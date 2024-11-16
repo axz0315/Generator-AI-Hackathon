@@ -19,14 +19,12 @@ async function saveActiveTabTime() {
 
     try {
       const tab = await chrome.tabs.get(activeTabId);
-      if (tab && tab.url && isValidTab(tab)) {
-        const fullUrl = tab.url;
-
-        if (!trackedData[fullUrl]) {
-          trackedData[fullUrl] = { title: tab.title || fullUrl, totalTime: 0 };
+      if (tab && tab.url) {
+        const url = new URL(tab.url).hostname;
+        if (!trackedData[url]) {
+          trackedData[url] = { title: tab.title || "Unknown", totalTime: 0 };
         }
-        trackedData[fullUrl].totalTime += elapsedTime;
-
+        trackedData[url].totalTime += elapsedTime;
         console.log("Updated trackedData:", trackedData);
 
         // Save updated trackedData to storage
@@ -38,14 +36,14 @@ async function saveActiveTabTime() {
   }
 }
 
-// Function to check if the tab is valid for tracking
-function isValidTab(tab) {
-  // Exclude tabs with the title "New Tab" or URLs starting with "chrome://"
-  if (tab.title === "New Tab" || tab.url.startsWith("chrome://")) {
-    console.log(`Skipping tab: ${tab.title} (${tab.url})`);
-    return false;
-  }
-  return true;
+// Function to convert trackedData into a list for Gemini
+function convertTrackedDataForGemini(trackedData) {
+  return Object.keys(trackedData).map(url => ({
+    url,
+    title: trackedData[url].title,
+    totalTime: trackedData[url].totalTime,
+    visit_date: new Date().toISOString().split('T')[0] // Use current date as visit date
+  }));
 }
 
 // Function to log stored data
@@ -73,26 +71,17 @@ chrome.tabs.onActivated.addListener(async (activeInfo) => {
   console.log("New active tab set:", activeTabId);
 });
 
-// Handle when a tab is updated (e.g., new page loaded, new URL or title)
+
+// Handle when a tab is updated (e.g., new page loaded)
 chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
   console.log("Tab updated:", tabId, changeInfo, tab);
 
-  if (tab.url && isValidTab(tab)) {
-    const fullUrl = tab.url;
-
-    // Update the title if available
-    if (changeInfo.title || tab.title) {
-      if (!trackedData[fullUrl]) {
-        trackedData[fullUrl] = { title: tab.title || fullUrl, totalTime: 0 };
-      } else {
-        trackedData[fullUrl].title = tab.title || fullUrl;
-      }
-      console.log("Updated title for URL:", fullUrl, trackedData[fullUrl].title);
+  if (changeInfo.status === "complete" && tab.url) {
+    const url = new URL(tab.url).hostname;
+    if (!trackedData[url]) {
+      trackedData[url] = { title: tab.title || "Unknown", totalTime: 0 };
     }
-
-    if (changeInfo.status === "complete") {
-      console.log("Page load complete for URL:", fullUrl);
-    }
+    console.log("Tracked or updated tab:", url, trackedData[url]);
   }
 });
 
@@ -130,13 +119,13 @@ chrome.tabs.onRemoved.addListener(async (tabId) => {
 // Respond to messages from the popup
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   console.log("Message received:", request);
-
   if (request.type === "getTrackedData") {
     sendResponse(trackedData);
   }
 });
 
-// ********** Testing **************
+
+// **********testing**************
 // Test function to retrieve and log stored data
 function testRetrieveStoredData() {
   retrieveStoredData();
