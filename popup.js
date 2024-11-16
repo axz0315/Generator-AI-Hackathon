@@ -12,30 +12,37 @@ document.addEventListener("DOMContentLoaded", () => {
       const row = document.createElement("tr");
       const noDataCell = document.createElement("td");
       noDataCell.textContent = "No data available";
-      noDataCell.colSpan = 3;
+      noDataCell.colSpan = 2;
       row.appendChild(noDataCell);
       tableBody.appendChild(row);
       return;
     }
 
-    for (const [url, data] of Object.entries(response)) {
+    // Sort entries by most recent (descending order of total time)
+    const sortedEntries = Object.entries(response).sort(
+      (a, b) => b[1].totalTime - a[1].totalTime
+    );
+
+    for (const [url, data] of sortedEntries) {
       console.log("Processing data for URL:", url, data);
 
       const row = document.createElement("tr");
 
-      const urlCell = document.createElement("td");
-      urlCell.textContent = url;
-      row.appendChild(urlCell);
+      // Website Column with Title as Link Text
+      const websiteCell = document.createElement("td");
+      const websiteLink = document.createElement("a");
+      websiteLink.href = `https://${url}`;
+      websiteLink.textContent = data.title || url; // Fallback to URL if title is missing
+      websiteLink.target = "_blank"; // Open link in a new tab
+      websiteCell.appendChild(websiteLink);
+      row.appendChild(websiteCell);
 
-      const titleCell = document.createElement("td");
-      titleCell.textContent = data.title || "N/A";
-      row.appendChild(titleCell);
-
+      // Time Column
       const timeCell = document.createElement("td");
-      timeCell.textContent = (data.totalTime / 1000).toFixed(2);
+      timeCell.textContent = (data.totalTime / 1000).toFixed(2); // Display time in seconds
       row.appendChild(timeCell);
 
-      tableBody.appendChild(row);
+      tableBody.prepend(row); // Add the newest at the top
     }
   });
 });
