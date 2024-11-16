@@ -19,7 +19,7 @@ async function saveActiveTabTime() {
 
     try {
       const tab = await chrome.tabs.get(activeTabId);
-      if (tab && tab.url) {
+      if (tab && tab.url && isValidTab(tab)) {
         const fullUrl = tab.url;
 
         if (!trackedData[fullUrl]) {
@@ -36,6 +36,16 @@ async function saveActiveTabTime() {
       console.error("Error saving active tab time:", error);
     }
   }
+}
+
+// Function to check if the tab is valid for tracking
+function isValidTab(tab) {
+  // Exclude tabs with the title "New Tab" or URLs starting with "chrome://"
+  if (tab.title === "New Tab" || tab.url.startsWith("chrome://")) {
+    console.log(`Skipping tab: ${tab.title} (${tab.url})`);
+    return false;
+  }
+  return true;
 }
 
 // Function to log stored data
@@ -67,7 +77,7 @@ chrome.tabs.onActivated.addListener(async (activeInfo) => {
 chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
   console.log("Tab updated:", tabId, changeInfo, tab);
 
-  if (tab.url) {
+  if (tab.url && isValidTab(tab)) {
     const fullUrl = tab.url;
 
     // Update the title if available
@@ -126,8 +136,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   }
 });
 
-
-// **********testing**************
+// ********** Testing **************
 // Test function to retrieve and log stored data
 function testRetrieveStoredData() {
   retrieveStoredData();
