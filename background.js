@@ -1,7 +1,15 @@
 let activeTabId = null;
 let activeTabStartTime = null;
 
-const trackedData = {};
+let trackedData = {};
+
+// Load tracked data from storage when the extension starts
+chrome.storage.local.get('trackedData', (result) => {
+  if (result.trackedData) {
+    trackedData = result.trackedData;
+  }
+  logStoredData(); // Log stored data when the extension starts
+});
 
 // Function to save data for the active tab
 async function saveActiveTabTime() {
@@ -18,6 +26,9 @@ async function saveActiveTabTime() {
         }
         trackedData[url].totalTime += elapsedTime;
         console.log("Updated trackedData:", trackedData);
+
+        // Save updated trackedData to storage
+        chrome.storage.local.set({ trackedData });
       }
     } catch (error) {
       console.error("Error saving active tab time:", error);
@@ -87,3 +98,6 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     sendResponse(trackedData);
   }
 });
+
+
+//log + retrive what's being stored in your current local database
