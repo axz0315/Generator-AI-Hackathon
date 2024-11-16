@@ -1,13 +1,24 @@
 document.addEventListener("DOMContentLoaded", () => {
   console.log("Popup loaded. Requesting data from background script...");
 
-  chrome.runtime.sendMessage({ type: "getTrackedData" }, (response) => {
-    console.log("Received data:", response);
+  let currentSortType = "recency"; // Default sort type
+  let responseData = {}; // To store the response data
 
+  // Fetch and render data
+  function fetchDataAndRender() {
+    chrome.runtime.sendMessage({ type: "getTrackedData" }, (response) => {
+      console.log("Received data:", response);
+      responseData = response; // Save response for sorting
+      renderTable(responseData, currentSortType);
+    });
+  }
+
+  // Render table based on sort type
+  function renderTable(data, sortType) {
     const tableBody = document.getElementById("data-table");
     tableBody.innerHTML = ""; // Clear previous data
 
-    if (!response || Object.keys(response).length === 0) {
+    if (!data || Object.keys(data).length === 0) {
       console.log("No data available.");
       const row = document.createElement("tr");
       const noDataCell = document.createElement("td");
@@ -18,66 +29,66 @@ document.addEventListener("DOMContentLoaded", () => {
       return;
     }
 
-    // Sort entries by most recent (descending order of total time)
-    const sortedEntries = Object.entries(response).sort(
-      (a, b) => b[1].totalTime - a[1].totalTime
-    );
-
-    for (const [url, data] of sortedEntries) {
-      console.log("Processing data for URL:", url, data);
-
-      const row = document.createElement("tr");
-
-      // Favicon Column
-      const faviconCell = document.createElement("td");
-      const faviconImg = document.createElement("img");
-      faviconImg.src = `https://www.google.com/s2/favicons?sz=64&domain_url=${url}`;
-      faviconImg.alt = "favicon";
-      faviconImg.width = 16; // Set the desired size
-      faviconImg.height = 16;
-      faviconCell.appendChild(faviconImg);
-      row.appendChild(faviconCell);
-
-      // Website Column with Title as Link Text
-      const websiteCell = document.createElement("td");
-      const websiteLink = document.createElement("a");
-      websiteLink.href = url;
-      websiteLink.textContent = data.title || url; // Fallback to URL if title is missing
-      websiteLink.target = "_blank"; // Open link in a new tab
-      websiteCell.appendChild(websiteLink);
-      row.appendChild(websiteCell);
-
-      // Time Column
-      // const timeCell = document.createElement("td");
-      // timeCell.textContent = (data.totalTime / 1000).toFixed(2); // Display time in seconds
-
-      const timeCell = document.createElement("td");
-      const totalTimeInMinutes = (data.totalTime / (1000 * 60)).toFixed(2); // Convert milliseconds to minutes
-      timeCell.textContent = totalTimeInMinutes + 'm'; // Display time in minutes
-      row.appendChild(timeCell);
-
-      tableBody.prepend(row); // Add the newest at the top
-    }
-  });
-  // Fetch summary automatically
-  chrome.runtime.sendMessage({ type: "getSummary" }, (summary) => {
-    console.log("Received summary:", summary);
-
-    const summaryDiv = document.getElementById("summary");
-    summaryDiv.innerHTML = ""; // Clear previous summary
-
-    if (!summary || summary.length === 0) {
-      summaryDiv.textContent = "No summary data available.";
-      return;
+    // Sort entries
+    let sortedEntries = Object.entries(data);
+    switch (sortType) {
+      case "recency":
+        sortedEntries.sort((a, b) => b[1].lastAccessed - a[1].lastAccessed); // Most recent first
+        break;
+      case "totalTime":
+        sortedEntries.sort((a, b) => b[1].totalTime - a[1].totalTime);
+        break;
+      case "category":
+        sortedEntries.sort((a, b) => {
+          const baseA = new URL(a[0]).hostname;
+          const baseB = new URL(b[0]).hostname;
+          return baseA.localeCompare(baseB);
+        });
+        break;
     }
 
-    const list = document.createElement("ul");
-    summary.forEach(({ url, title, totalTime }) => {
-      const listItem = document.createElement("li");
-      listItem.textContent = `${title} (${url}): ${totalTime} seconds`;
-      list.appendChild(listItem);
+    sortedEntries.forEach(([url, data]) => {
+      if (data.totalTime > 30) { // Only include entries with more than 30 seconds
+        console.log("Processing data for URL:", url, data);
+
+        const row = document.createElement("tr");
+
+        // Favicon Column
+        const faviconCell = document.createElement("td");
+        const faviconImg = document.createElement("img");
+        faviconImg.src = `https://www.google.com/s2/favicons?sz=64&domain_url=${url}`;
+        faviconImg.alt = "favicon";
+        faviconImg.width = 16;
+        faviconImg.height = 16;
+        faviconCell.appendChild(faviconImg);
+        row.appendChild(faviconCell);
+
+        // Website Column
+        const websiteCell = document.createElement("td");
+        const websiteLink = document.createElement("a");
+        websiteLink.href = url;
+        websiteLink.textContent = data.title || new URL(url).hostname; // Show title or base URL
+        websiteLink.target = "_blank";
+        websiteCell.appendChild(websiteLink);
+        row.appendChild(websiteCell);
+
+        // Time Column
+        const timeCell = document.createElement("td");
+        const totalTimeInMinutes = (data.totalTime / (1000 * 60)).toFixed(2); // Convert milliseconds to minutes
+        timeCell.textContent = totalTimeInMinutes + "m";
+        row.appendChild(timeCell);
+
+        tableBody.prepend(row); // Prepend the row to place it at the top
+      }
     });
+  }
 
-    summaryDiv.appendChild(list);
+  // Handle sort type change
+  document.getElementById("sort-dropdown").addEventListener("change", (e) => {
+    currentSortType = e.target.value;
+    renderTable(responseData, currentSortType);
   });
+
+  // Fetch data on load
+  fetchDataAndRender();
 });
