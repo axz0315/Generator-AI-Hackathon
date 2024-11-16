@@ -36,6 +36,20 @@ async function saveActiveTabTime() {
   }
 }
 
+// Function to log stored data
+function logStoredData() {
+  chrome.storage.local.get('trackedData', (result) => {
+    console.log("Stored trackedData:", result.trackedData);
+  });
+}
+
+// Function to retrieve stored data
+function retrieveStoredData() {
+  chrome.storage.local.get('trackedData', (result) => {
+    console.log("Retrieved trackedData:", result.trackedData);
+  });
+}
+
 // Handle when the active tab changes
 chrome.tabs.onActivated.addListener(async (activeInfo) => {
   console.log("Tab activated:", activeInfo);
@@ -46,6 +60,7 @@ chrome.tabs.onActivated.addListener(async (activeInfo) => {
   activeTabStartTime = Date.now();
   console.log("New active tab set:", activeTabId);
 });
+
 
 // Handle when a tab is updated (e.g., new page loaded)
 chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
@@ -100,4 +115,8 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
 });
 
 
-//log + retrive what's being stored in your current local database
+// **********testing**************
+// Test function to retrieve and log stored data
+function testRetrieveStoredData() {
+  retrieveStoredData();
+}
