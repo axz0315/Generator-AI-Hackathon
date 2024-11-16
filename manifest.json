@@ -8,9 +8,9 @@
   },
   "action": {
     "default_popup": "popup.html",
-    "default_icon": "hello_extensions.png"
+    "default_icon": "tinycat.png"
   },
   "icons": {
-    "128": "hello_extensions.png"
+    "128": "tinycat.png"
   }
 }
