@@ -2,7 +2,7 @@
   "manifest_version": 3,
   "name": "Website Tracker",
   "version": "1.0",
-  "permissions": ["tabs", "storage", "activeTab"],
+  "permissions": ["tabs", "storage", "activeTab", "https://api.gemini.com/AIzaSyC0A559rCoDFiCPrUNp1Hg4DNElihwF2Ug"],
   "background": {
     "service_worker": "background.js"
   },
