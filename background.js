@@ -1,7 +1,15 @@
 let activeTabId = null;
 let activeTabStartTime = null;
 
-const trackedData = {};
+let trackedData = {};
+
+// Load tracked data from storage when the extension starts
+chrome.storage.local.get('trackedData', (result) => {
+  if (result.trackedData) {
+    trackedData = result.trackedData;
+  }
+  logStoredData(); // Log stored data when the extension starts
+});
 
 // Function to save data for the active tab
 async function saveActiveTabTime() {
@@ -20,11 +28,28 @@ async function saveActiveTabTime() {
         trackedData[fullUrl].totalTime += elapsedTime;
 
         console.log("Updated trackedData:", trackedData);
+
+        // Save updated trackedData to storage
+        chrome.storage.local.set({ trackedData });
       }
     } catch (error) {
       console.error("Error saving active tab time:", error);
     }
   }
+}
+
+// Function to log stored data
+function logStoredData() {
+  chrome.storage.local.get('trackedData', (result) => {
+    console.log("Stored trackedData:", result.trackedData);
+  });
+}
+
+// Function to retrieve stored data
+function retrieveStoredData() {
+  chrome.storage.local.get('trackedData', (result) => {
+    console.log("Retrieved trackedData:", result.trackedData);
+  });
 }
 
 // Handle when the active tab changes
@@ -38,7 +63,7 @@ chrome.tabs.onActivated.addListener(async (activeInfo) => {
   console.log("New active tab set:", activeTabId);
 });
 
-// Handle when a tab is updated (e.g., new URL or title)
+// Handle when a tab is updated (e.g., new page loaded, new URL or title)
 chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
   console.log("Tab updated:", tabId, changeInfo, tab);
 
@@ -100,3 +125,10 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     sendResponse(trackedData);
   }
 });
+
+
+// **********testing**************
+// Test function to retrieve and log stored data
+function testRetrieveStoredData() {
+  retrieveStoredData();
+}
