@@ -12,7 +12,7 @@ document.addEventListener("DOMContentLoaded", () => {
       const row = document.createElement("tr");
       const noDataCell = document.createElement("td");
       noDataCell.textContent = "No data available";
-      noDataCell.colSpan = 2;
+      noDataCell.colSpan = 3;
       row.appendChild(noDataCell);
       tableBody.appendChild(row);
       return;
@@ -28,10 +28,20 @@ document.addEventListener("DOMContentLoaded", () => {
 
       const row = document.createElement("tr");
 
+      // Favicon Column
+      const faviconCell = document.createElement("td");
+      const faviconImg = document.createElement("img");
+      faviconImg.src = `https://www.google.com/s2/favicons?sz=64&domain_url=${url}`;
+      faviconImg.alt = "favicon";
+      faviconImg.width = 16; // Set the desired size
+      faviconImg.height = 16;
+      faviconCell.appendChild(faviconImg);
+      row.appendChild(faviconCell);
+
       // Website Column with Title as Link Text
       const websiteCell = document.createElement("td");
       const websiteLink = document.createElement("a");
-      websiteLink.href = `https://${url}`;
+      websiteLink.href = url;
       websiteLink.textContent = data.title || url; // Fallback to URL if title is missing
       websiteLink.target = "_blank"; // Open link in a new tab
       websiteCell.appendChild(websiteLink);

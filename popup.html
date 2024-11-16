@@ -2,15 +2,40 @@
 <html>
 <head>
   <title>Website Tracker</title>
-  <link rel="stylesheet" type="text/css" href="style.css">
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+    th, td {
+      border: 1px solid #ddd;
+      padding: 8px;
+    }
+    th {
+      background-color: #f2f2f2;
+    }
+    img {
+      vertical-align: middle;
+    }
+    a {
+      color: blue;
+      text-decoration: underline;
+    }
+    a:hover {
+      color: darkblue;
+    }
+  </style>
 </head>
 <body>
   <h1>Website Tracker</h1>
   <table>
     <thead>
       <tr>
+        <th>Favicon</th>
         <th>Website</th>
-        <th>Title</th>
         <th>Time (s)</th>
       </tr>
     </thead>
