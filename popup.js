@@ -9,6 +9,7 @@ document.addEventListener("DOMContentLoaded", () => {
     chrome.runtime.sendMessage({ type: "getTrackedData" }, (response) => {
       console.log("Received data:", response);
       responseData = response; // Save response for sorting
+      console.log(responseData);
       renderTable(responseData, currentSortType);
     });
   }
@@ -36,7 +37,7 @@ document.addEventListener("DOMContentLoaded", () => {
         sortedEntries.sort((a, b) => b[1].lastAccessed - a[1].lastAccessed); // Most recent first
         break;
       case "totalTime":
-        sortedEntries.sort((a, b) => b[1].totalTime - a[1].totalTime);
+        sortedEntries.sort((a, b) => a[1].totalTime - b[1].totalTime); // Lowest total time first
         break;
       case "category":
         sortedEntries.sort((a, b) => {
@@ -47,7 +48,9 @@ document.addEventListener("DOMContentLoaded", () => {
         break;
     }
 
+    // Render sorted entries (prepend rows to display newest or highest first)
     sortedEntries.forEach(([url, data]) => {
+      
       if (data.totalTime > 30) { // Only include entries with more than 30 seconds
         console.log("Processing data for URL:", url, data);
 
@@ -78,7 +81,7 @@ document.addEventListener("DOMContentLoaded", () => {
         timeCell.textContent = totalTimeInMinutes + "m";
         row.appendChild(timeCell);
 
-        tableBody.prepend(row); // Prepend the row to place it at the top
+        tableBody.prepend(row); // Prepend the row to display the newest/highest first
       }
     });
   }
