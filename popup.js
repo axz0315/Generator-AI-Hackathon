@@ -53,7 +53,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
       const timeCell = document.createElement("td");
       const totalTimeInMinutes = (data.totalTime / (1000 * 60)).toFixed(2); // Convert milliseconds to minutes
-      timeCell.textContent = totalTimeInMinutes; // Display time in minutes
+      timeCell.textContent = totalTimeInMinutes + 'm'; // Display time in minutes
       row.appendChild(timeCell);
 
       tableBody.prepend(row); // Add the newest at the top

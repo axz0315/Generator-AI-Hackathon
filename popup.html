@@ -8,45 +8,76 @@
     body {
         font-family: 'Quicksand', sans-serif;
     }
+
+    h1 {
+        text-align: center;
+    }
+
+    /* Container for the table */
+    .table-container {
+      width: 400px;
+      height: 250px;
+      overflow-y: auto; /* Enable vertical scrolling */
+      border: 1px solid #ddd;
+      margin: 0 auto; /* Center the table container */
+    }
+
     table {
       width: 100%;
       border-collapse: collapse;
     }
+
     th, td {
       border: 1px solid #ddd;
       padding: 8px;
     }
+
     th {
       background-color: #f2f2f2;
+      position: sticky;
+      top: 0; /* Keep header at the top */
+      z-index: 1; /* Ensure header stays above table rows */
     }
+
     img {
       vertical-align: middle;
     }
+
     a {
       color: blue;
       text-decoration: underline;
     }
+
     a:hover {
       color: darkblue;
+    }
+
+    #summary {
+      text-align: center;
+      margin-bottom: 10px;
     }
   </style>
 </head>
 <body>
   <h1>Productive Cat</h1>
-  <table>
-    <thead>
-      <tr>
-        <th>Favicon</th>
-        <th>Website</th>
-        <th>Time (m)</th>
-      </tr>
-    </thead>
-    <h2>Summary</h2>
-    <div id="summary">
-      <!-- Summary will be displayed here -->
-    </div>
-    <tbody id="data-table"></tbody>
-  </table>
+  <h2>Summary</h2>
+  <div id="summary">
+    <!-- Summary will be displayed here -->
+  </div>
+  <div class="table-container">
+    <table>
+      <thead>
+        <tr>
+          <th>Favicon</th>
+          <th>Website</th>
+          <th>Time</th>
+        </tr>
+      </thead>
+      <tbody id="data-table">
+        <!-- Data rows will be dynamically added here -->
+      </tbody>
+    </table>
+  </div>
   <script src="popup.js"></script>
 </body>
 </html>
