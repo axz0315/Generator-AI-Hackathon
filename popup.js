@@ -94,4 +94,5 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // Fetch data on load
   fetchDataAndRender();
+
 });
