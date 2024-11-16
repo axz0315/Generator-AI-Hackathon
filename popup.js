@@ -56,24 +56,24 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   });
   // Fetch summary automatically
-  chrome.runtime.sendMessage({ type: "getSummary" }, (summary) => {
-    console.log("Received summary:", summary);
+  // chrome.runtime.sendMessage({ type: "getSummary" }, (summary) => {
+  //   console.log("Received summary:", summary);
 
-    const summaryDiv = document.getElementById("summary");
-    summaryDiv.innerHTML = ""; // Clear previous summary
+  //   const summaryDiv = document.getElementById("summary");
+  //   summaryDiv.innerHTML = ""; // Clear previous summary
 
-    if (!summary || summary.length === 0) {
-      summaryDiv.textContent = "No summary data available.";
-      return;
-    }
+  //   // if (!summary || summary.length === 0) {
+  //   //   summaryDiv.textContent = "No summary data available.";
+  //   //   return;
+  //   // }
 
-    const list = document.createElement("ul");
-    summary.forEach(({ url, title, totalTime }) => {
-      const listItem = document.createElement("li");
-      listItem.textContent = `${title} (${url}): ${totalTime} seconds`;
-      list.appendChild(listItem);
-    });
+  //   const list = document.createElement("ul");
+  //   summary.forEach(({ url, title, totalTime }) => {
+  //     const listItem = document.createElement("li");
+  //     listItem.textContent = `${title} (${url}): ${totalTime} seconds`;
+  //     list.appendChild(listItem);
+  //   });
 
-    summaryDiv.appendChild(list);
-  });
+  //   summaryDiv.appendChild(list);
+  // });
 });
