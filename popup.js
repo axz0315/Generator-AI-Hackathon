@@ -48,8 +48,12 @@ document.addEventListener("DOMContentLoaded", () => {
       row.appendChild(websiteCell);
 
       // Time Column
+      // const timeCell = document.createElement("td");
+      // timeCell.textContent = (data.totalTime / 1000).toFixed(2); // Display time in seconds
+
       const timeCell = document.createElement("td");
-      timeCell.textContent = (data.totalTime / 1000).toFixed(2); // Display time in seconds
+      const totalTimeInMinutes = (data.totalTime / (1000 * 60)).toFixed(2); // Convert milliseconds to minutes
+      timeCell.textContent = totalTimeInMinutes; // Display time in minutes
       row.appendChild(timeCell);
 
       tableBody.prepend(row); // Add the newest at the top
