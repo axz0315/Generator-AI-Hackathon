@@ -20,11 +20,13 @@ async function saveActiveTabTime() {
     try {
       const tab = await chrome.tabs.get(activeTabId);
       if (tab && tab.url) {
-        const url = new URL(tab.url).hostname;
-        if (!trackedData[url]) {
-          trackedData[url] = { title: tab.title || "Unknown", totalTime: 0 };
+        const fullUrl = tab.url;
+
+        if (!trackedData[fullUrl]) {
+          trackedData[fullUrl] = { title: tab.title || fullUrl, totalTime: 0 };
         }
-        trackedData[url].totalTime += elapsedTime;
+        trackedData[fullUrl].totalTime += elapsedTime;
+
         console.log("Updated trackedData:", trackedData);
 
         // Save updated trackedData to storage
@@ -61,17 +63,26 @@ chrome.tabs.onActivated.addListener(async (activeInfo) => {
   console.log("New active tab set:", activeTabId);
 });
 
-
-// Handle when a tab is updated (e.g., new page loaded)
+// Handle when a tab is updated (e.g., new page loaded, new URL or title)
 chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
   console.log("Tab updated:", tabId, changeInfo, tab);
 
-  if (changeInfo.status === "complete" && tab.url) {
-    const url = new URL(tab.url).hostname;
-    if (!trackedData[url]) {
-      trackedData[url] = { title: tab.title || "Unknown", totalTime: 0 };
+  if (tab.url) {
+    const fullUrl = tab.url;
+
+    // Update the title if available
+    if (changeInfo.title || tab.title) {
+      if (!trackedData[fullUrl]) {
+        trackedData[fullUrl] = { title: tab.title || fullUrl, totalTime: 0 };
+      } else {
+        trackedData[fullUrl].title = tab.title || fullUrl;
+      }
+      console.log("Updated title for URL:", fullUrl, trackedData[fullUrl].title);
     }
-    console.log("Tracked or updated tab:", url, trackedData[url]);
+
+    if (changeInfo.status === "complete") {
+      console.log("Page load complete for URL:", fullUrl);
+    }
   }
 });
 
@@ -109,6 +120,7 @@ chrome.tabs.onRemoved.addListener(async (tabId) => {
 // Respond to messages from the popup
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   console.log("Message received:", request);
+
   if (request.type === "getTrackedData") {
     sendResponse(trackedData);
   }
